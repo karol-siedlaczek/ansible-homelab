@@ -1,0 +1,3 @@
+env_proxy:
+  http_proxy: "some proxy host"
+  https_proxy: "some proxy host"

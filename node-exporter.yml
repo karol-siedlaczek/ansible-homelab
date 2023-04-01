@@ -1,0 +1,17 @@
+- hosts: test-hosts
+  become: no
+  remote_user: root
+
+  vars:
+    install_dir: "/usr/local/bin/exporters"
+    exporter:
+      name: "node_exporter"
+      version: "1.5.0"
+      download_url: "https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-amd64.tar.gz"
+      sha256sum: "af999fd31ab54ed3a34b9f0b10c28e9acee9ef5ac5a5d5edfdde85437db7acbb"
+    service:
+      start_command: "{{ install_dir }}/node_exporter/node_exporter"
+      environment: ""
+
+  roles:
+    - exporter

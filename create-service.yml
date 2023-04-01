@@ -1,0 +1,26 @@
+- hosts: homelab-hosts
+  become: no
+  remote_user: root
+
+  vars_prompt:
+    - name: service_name
+      prompt: "Name of service"
+      private: no
+    - name: user
+      prompt: "Username of new user"
+      private: no
+    - name: group
+      prompt: "Group name of new user"
+      private: no
+    - name: start_command
+      prompt: "Command which need to be executed to start process"
+      private: no
+    - name: environment
+      prompt: "Environment (optional)"
+      private: no
+    - name: startup
+      prompt: "Run this service on host startup? (y/n)"
+      private: no
+
+  roles:
+    - create-service

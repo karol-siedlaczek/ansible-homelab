@@ -1,0 +1,17 @@
+- name: Update apt
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install apt packages
+  apt:
+    name:
+      - libcrypt-des-perl
+      - libcrypt-rijndael-perl
+      - libdigest-hmac-perl
+    state: present
+
+- include_vars: vault.yml
+- include: apache2.yml
+- include: nsca.yml
+- include: nagios.yml

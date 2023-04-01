@@ -1,0 +1,6 @@
+- hosts: nagios-hosts
+  become: no
+  remote_user: root
+
+  roles:
+    - nagios/setup

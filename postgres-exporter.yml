@@ -1,0 +1,17 @@
+- hosts: homelab-hosts
+  become: no
+  remote_user: root
+
+  vars:
+    install_dir: "/usr/local/bin/exporters"
+    exporter:
+      name: "postgres_exporter"
+      version: ""
+      download_url: ""
+      sha256sum: ""
+    service:
+      start_command: "{{ install_dir }}/postgres_exporter/postgres_exporter"
+      environment: ""
+
+  roles:
+    - create-service

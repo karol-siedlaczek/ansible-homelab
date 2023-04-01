@@ -1,0 +1,19 @@
+- name: Restart apache2
+  service:
+    name: apache2
+    state: restarted
+
+- name: Start nsca
+  service:
+    name: nsca
+    state: started
+
+- name: Reload nsca
+  service:
+    name: nsca
+    state: reloaded
+
+- name: Restart nagios
+  service:
+    name: "nagios{{nagios.version}}"
+    state: restarted

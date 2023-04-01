@@ -1,0 +1,8 @@
+#!/usr/bin/ansible-playbook --ask-vault-pass -i hosts
+
+- hosts: nagios-hosts
+  become: no
+  remote_user: root
+
+  roles:
+    - nagios/configure

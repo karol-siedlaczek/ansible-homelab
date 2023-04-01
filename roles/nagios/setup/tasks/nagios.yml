@@ -1,0 +1,26 @@
+- name: "Install nagios{{ nagios.version }}"
+  apt:
+    name: "nagios{{nagios.version}}"
+    state: present
+
+- name: Add NAGIOS-NOTIFY-MIB
+  copy:
+    src: files/NAGIOS-NOTIFY-MIB.txt
+    dest: /usr/share/snmp/mibs/NAGIOS-NOTIFY-MIB.txt
+
+- name: Add NAGIOS-ROOT-MIB
+  copy:
+    src: files/NAGIOS-ROOT-MIB.txt
+    dest: /usr/share/snmp/mibs/NAGIOS-ROOT-MIB.txt
+
+- name: Change nagios homepage
+  replace:
+    path: "/usr/share/nagios{{ nagios.version }}/htdocs/index.php"
+    regexp: ^(\$url\s=\s')([a-zA-Z0-9\/&=\-?.]*)(';)
+    replace: "\\1{{ homepage_url }}\\3"
+  notify:
+    - Restart nagios
+
+- name: Useful info
+  debug:
+    msg: 'Create some nagios user with command htdigest -c /etc/nagios{{ nagios.version }}/htdigest.users "Nagios Access" <some_user>'

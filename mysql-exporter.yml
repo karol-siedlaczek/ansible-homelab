@@ -1,0 +1,36 @@
+- hosts: homelab-hosts
+  become: no
+  remote_user: root
+
+  vars:
+    install_dir: "/usr/local/bin/exporters"
+    exporter:
+      name: "postgres_exporter"
+      version: ""
+      download_url: ""
+      sha256sum: ""
+    service:
+      start_command: |
+        {{ install_dir }}/mysql_exporter/mysqld_exporter \
+        --config.my-cnf {{ install_dir }}/mysql_exporter/.mysql_exporter.cnf \
+        --collect.global_status \
+        --collect.info_schema.innodb_metrics \
+        --collect.auto_increment.columns \
+        --collect.info_schema.processlist \
+        --collect.binlog_size \
+        --collect.mysql.user \
+        --collect.info_schema.tablestats \
+        --collect.global_variables \
+        --collect.info_schema.query_response_time \
+        --collect.info_schema.userstats \
+        --collect.info_schema.tables \
+        --collect.perf_schema.tablelocks \
+        --collect.perf_schema.file_events \
+        --collect.perf_schema.eventswaits \
+        --collect.perf_schema.indexiowaits \
+        --collect.perf_schema.tableiowaits \
+        --collect.perf_schema.memory_events
+      environment: ""
+
+  roles:
+    - create-service

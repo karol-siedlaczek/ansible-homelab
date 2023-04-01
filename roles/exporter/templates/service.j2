@@ -1,0 +1,17 @@
+[Unit]
+Description={{ exporter.name }}
+After=syslog.target network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User={{ user.name }}
+Group={{ group.name }}
+ExecStart={{ service.start_command }}
+SyslogIdentifier={{ exporter.name }}
+Environment="{{ service.environment }}"
+Restart=always
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target

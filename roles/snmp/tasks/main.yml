@@ -1,0 +1,46 @@
+- name: Install snmp
+  apt:
+    name: snmp
+    state: present
+
+- name: Install snmpd
+  apt:
+    name: snmpd
+    state: present
+
+- name: Stop snmpd
+  service:
+    name: snmpd
+    state: stopped
+
+- name: Install snmp-mibs-downloader
+  apt:
+    name: snmp-mibs-downloader
+    state: present
+  ignore_errors: true
+  register: snmp_mibs_downloader_apt
+
+- name: Add snmpd.conf
+  template:
+    src: templates/snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+
+- name: Edit snmp.conf
+  replace:
+    path: /etc/snmp/snmp.conf
+    regexp: '^(mibs\s):'
+    replace: '\1+ALL'
+  when: not snmp_mibs_downloader_apt.failed
+
+- name: Start snmpd
+  service:
+    name: snmpd
+    state: started
+
+- name: Remove credentials from snmpd.conf
+  replace:
+    path: /etc/snmp/snmpd.conf
+    regexp: '^createUser {{ snmp.user }} SHA "{{ snmp.password }}" AES "{{ snmp.password }}"'
+    replace: ''
+
+#extend check_raid /usr/local/bin/nagios/check_raid.pl

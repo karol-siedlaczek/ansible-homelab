@@ -1,0 +1,99 @@
+- name: "Check if '{{ nagios.scripts_path }}' directory exists"
+  stat:
+    path: "{{ nagios.scripts_path }}"
+  register: scripts_dir
+
+- name: "Create '{{ nagios.scripts_path }}' directory"
+  file:
+    path: "{{ nagios.scripts_path }}"
+    state: directory
+  when: not scripts_dir.stat.exists
+
+- name: Remove old hosts .cfg files
+  file:
+    path: "/etc/nagios{{ nagios.version }}/conf.d/hosts"
+    state: absent
+
+- name: Add hosts .cfg files
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/nagios{{ nagios.version }}/conf.d/hosts/"
+    mode: 0644
+    owner: root
+    group: root
+    force: true
+  with_filetree: files/hosts/
+
+- name: Remove old services .cfg files
+  file:
+    path: "/etc/nagios{{ nagios.version }}/conf.d/services"
+    state: absent
+
+- name: Add services .cfg files
+  copy:
+    src: "{{ item.src }}"
+    dest: "/etc/nagios{{ nagios.version }}/conf.d/services/"
+    mode: 0644
+    owner: root
+    group: root
+    force: true
+  with_filetree: files/services/
+
+- name: Add checks
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ nagios.scripts_path }}/checks/"
+    mode: 0755
+    owner: root
+    group: root
+    force: true
+  with_filetree: files/checks/
+  when: item.state == 'file'
+
+- name: Add scripts
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ nagios.scripts_path }}/{{ (item.src|basename)[:-3] }}"
+    mode: 0755
+    owner: root
+    group: root
+    force: true
+  with_filetree: templates/scripts/
+  when: item.state == 'file'
+
+- name: Move object .cfg files (templates, commands, contancts, timeperiods)
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/nagios{{ nagios.version }}/objects/{{ (item.src|basename)[:-3] }}"
+    mode: 0644
+    owner: root
+    group: nagios
+    force: true
+  with_filetree: templates/objects/
+  when: item.state == 'file'
+
+- name: Move configuration files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0640
+    owner: nagios
+    group: www-data
+    force: true
+  with_items:
+    - { src: templates/config/nagios.cfg.j2, dest: "/etc/nagios{{ nagios.version }}/nagios.cfg"}
+    - { src: templates/config/cgi.cfg.j2, dest: "/etc/nagios{{ nagios.version }}/cgi.cfg"}
+    - { src: templates/config/resource.cfg.j2, dest: "/etc/nagios{{ nagios.version }}/resource.cfg"}
+
+#- name: Install dos2unix apt
+#  apt:
+#    name: dos2unix
+#    state: present
+#
+#- name: Convert checks to DOS format
+#  shell: "dos2unix {{ nagios.scripts_path }}/checks/*"
+
+- name: "Reload nagios{{ nagios.version }}"
+  systemd:
+    name: "nagios{{ nagios.version }}.service"
+    state: reloaded
