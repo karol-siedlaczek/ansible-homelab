@@ -1,0 +1,14 @@
+[DEFAULT]
+sendermail = Fail2Ban
+destemail = {{ fail2ban.default.dest_email }}
+backend = auto
+findtime = 10m
+bantime = 12h
+ignoreip = {{ fail2ban.default.ignore_ip }}
+
+[ssh]
+enabled = true
+filter = sshd
+port = {{ fail2ban.ssh.port }}
+logpath = /var/log/auth.log
+maxretry = 5
