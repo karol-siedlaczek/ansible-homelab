@@ -15,6 +15,14 @@
   apache2_module:
     name: cgi
     state: present
+  ignore_errors: true
+  register: cgi_module
+  
+- name: Enable cgid module in apache2
+  apache2_module:
+    name: cgid
+    state: present
+  when: cgi_module.failed
 
 - name: Enable ssl module in apache2
   apache2_module:
