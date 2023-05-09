@@ -17,3 +17,25 @@
     replace: "\\1/var/lib/nagios{{ nagios.version }}/rw/nagios.cmd"
   notify:
     - Reload nsca
+
+- name: Edit nsca password in nsca.cfg
+  replace:
+    path: /etc/nsca.cfg
+    regexp: ^([p|#p]+assword)[a-zA-Z\/=0-9.]*
+    replace: "password={{ nsca_password }}"
+  notify:
+    - Reload nsca
+- name: Edit nsca password in send_nsca.cfg
+  replace:
+    path: /etc/send_nsca.cfg
+    regexp: ^([p|#p]+assword)[a-zA-Z\/=0-9.]*
+    replace: "password={{ send_nsca_password }}"
+  notify:
+    - Reload nsca
+- name: Edit encryption method in send_nsca.cfg
+  replace:
+    path: /etc/send_nsca.cfg
+    regexp: ^([e|#e]+ncryption_method)[a-zA-Z\/=0-9.]*
+    replace: "\\1={{ send_nsca_encryption_method }}"
+  notify:
+    - Reload nsca
