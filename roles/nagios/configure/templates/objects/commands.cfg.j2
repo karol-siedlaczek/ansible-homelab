@@ -28,9 +28,14 @@ define command {
         command_line    /usr/bin/perl {{ nagios.scripts_path }}/checks/check_snmp_storage.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -m "/" -L sha,aes -w $ARG1$ -c $ARG2$ -S 0,1
 }
 
-define command {        # adds cached, buffered and shared memory to available, so only currently used memory is checking
+define command {	# requires sysMemAvail.0 MIB on remote machine
         command_name    check_snmp_mem_usage
-        command_line    {{ nagios.scripts_path }}/checks/check_netsnmp_mem.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -T sha,aes -w $ARG1$ -c $ARG2$ -a 'Mem usage','Swap usage'
+        command_line    {{ nagios.scripts_dir }}/checks/check_snmp_mem.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
+}
+
+define command {  	# requires meminfo extend script in snmpd.conf on remote machine
+        command_name    check_snmp_meminfo_usage
+        command_line    {{ nagios.scripts_dir }}/checks/check_snmp_meminfo.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
 }
 
 define command {
@@ -44,8 +49,8 @@ define command {
 }
 
 define command {
-	    command_name	check_snmp_process_mem_usage
-	    command_line	{{ nagios.scripts_path }}/checks/check_snmp_process.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -L sha,aes -n $ARG1$ -m $ARG2$
+	command_name	check_snmp_process_mem_usage
+	command_line	{{ nagios.scripts_path }}/checks/check_snmp_process.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -L sha,aes -n $ARG1$ -m $ARG2$
 }
 
 define command {
@@ -54,7 +59,7 @@ define command {
 }
 
 define command {
-        command_name	check_linux_snmp_raid
+        command_name	check_snmp_raid
         command_line	/usr/bin/perl {{ nagios.scripts_path }}/checks/check_linux_snmp_raid.pl -H $HOSTADDRESS$ -v 3 -u $USER2$ -a $USER3$ -x $USER3$ -X AES -A SHA
 }
 
@@ -74,8 +79,8 @@ define command {
 }
 
 define command {
-        command_name	check_partition_mountpoint
-	    command_line	{{ nagios.scripts_path }}/checks/check_partition_mountpoint.sh $ARG1$
+        command_name	check_disk_mount
+	command_line	{{ nagios.scripts_path }}/checks/check_disk_mount.sh $ARG1$
 }
 
 
