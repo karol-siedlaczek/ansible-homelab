@@ -54,21 +54,6 @@ define host {
     register                        0                       ; DONT REGISTER THIS DEFINITION - ITS NOT A REAL HOST, JUST A TEMPLATE!
 }
 
-define host {
-    name                            linux-server            ; The name of this host template
-    use                             generic-host            ; This template inherits other values from the generic-host template
-    check_period                    24x7                    ; By default, Linux hosts are checked round the clock
-    check_interval                  5                       ; Actively check the host every 5 minutes
-    retry_interval                  1                       ; Schedule host check retries at 1 minute intervals
-    max_check_attempts              10                      ; Check each Linux host 10 times (max)
-    check_command                   check-host-alive        ; Default command to check Linux hosts
-    notification_period             workhours               ; Linux admins hate to be woken up, so we only notify during the day
-    notification_interval           120                     ; Resend notifications every 2 hours
-    notification_options            d,u,r                   ; Only send notifications for specific host states
-    contact_groups                  admins                  ; Notifications get sent to the admins by default
-    register                        0                       ; DON'T REGISTER THIS DEFINITION - ITS NOT A REAL HOST, JUST A TEMPLATE!
-}
-
 ###############################################################################
 #
 # SERVICE TEMPLATES
@@ -125,7 +110,7 @@ define service {
 }
 
 define service {
-    name                            generic-service-soft    ; The 'name' of this service template
+    name                            generic-soft-service    ; The 'name' of this service template
     active_checks_enabled           1                       ; Active service checks are enabled
     passive_checks_enabled          1                       ; Passive service checks are enabled/accepted
     parallelize_check               1                       ; Active service checks should be parallelized (disabling this can lead>
@@ -140,17 +125,17 @@ define service {
     is_volatile                     0                       ; The service is not volatile
     check_period                    24x7                    ; The service can be checked at any time of the day
     max_check_attempts              3                       ; Re-check the service up to 3 times in order to determine its final (h>
-    check_interval                  5                      ; Check the service every 10 minutes under normal conditions
+    check_interval                  5                       ; Check the service every 10 minutes under normal conditions
     retry_interval                  2                       ; Re-check the service every two minutes until a hard state can be dete>
     contact_groups                  admins                  ; Notifications get sent out to everyone in the 'admins' group
-    notification_options            u,c,r                 ; Send notifications about warning, unknown, critical, and recovery eve>
+    notification_options            u,c,r                   ; Send notifications about warning, unknown, critical, and recovery eve>
     notification_interval           60                      ; Re-notify about service problems every hour
     notification_period             24x7                    ; Notifications can be sent out at any time
     register                        0                       ; DON'T REGISTER THIS DEFINITION - ITS NOT A REAL SERVICE, JUST A TEMPL>
 }
 
 define service {
-    name                            generic-service-one-per-day ; The 'name' of this service template
+    name                            generic-daily-service   ; The 'name' of this service template
     active_checks_enabled           1                       ; Active service checks are enabled
     passive_checks_enabled          1                       ; Passive service checks are enabled/accepted
     parallelize_check               1                       ; Active service checks should be parallelized (disabling this can lead>
