@@ -28,14 +28,14 @@ define command {
         command_line    /usr/bin/perl {{ nagios.scripts_path }}/checks/check_snmp_storage.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -m "/" -L sha,aes -w $ARG1$ -c $ARG2$ -S 0,1
 }
 
-define command {	# requires sysMemAvail.0 MIB on remote machine
+define command {	    # requires sysMemAvail.0 MIB on remote machine
         command_name    check_snmp_mem_usage
-        command_line    {{ nagios.scripts_dir }}/checks/check_snmp_mem.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
+        command_line    {{ nagios.scripts_path }}/checks/check_snmp_mem.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
 }
 
-define command {  	# requires meminfo extend script in snmpd.conf on remote machine
+define command {  	    # requires meminfo extend script in snmpd.conf on remote machine
         command_name    check_snmp_meminfo_usage
-        command_line    {{ nagios.scripts_dir }}/checks/check_snmp_meminfo.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
+        command_line    {{ nagios.scripts_path }}/checks/check_snmp_meminfo.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -w $ARG1$ -c $ARG2$ -n
 }
 
 define command {
@@ -49,8 +49,8 @@ define command {
 }
 
 define command {
-	command_name	check_snmp_process_mem_usage
-	command_line	{{ nagios.scripts_path }}/checks/check_snmp_process.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -L sha,aes -n $ARG1$ -m $ARG2$
+	    command_name	check_snmp_process_mem_usage
+	    command_line	{{ nagios.scripts_path }}/checks/check_snmp_process.pl -H $HOSTADDRESS$ -l $USER2$ -x $USER3$ -X $USER3$ -L sha,aes -n $ARG1$ -m $ARG2$
 }
 
 define command {
@@ -65,12 +65,7 @@ define command {
 
 define command {
          command_name	check_ssl_cert
-         command_line	{{ nagios.scripts_path }}/checks/check_ssl_cert.sh -h $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
-}
-
-define command {
-	command_name	check_domain_expiration
-	command_line	{{ nagios.scripts_path }}/checks/check_domain_expiration.sh -d $HOSTADDRESS$ -w $ARG1$ -c $ARG2$
+         command_line	{{ nagios.scripts_path }}/checks/check_ssl_cert.sh -h $HOSTNAME$ -w $ARG1$ -c $ARG2$
 }
 
 define command {
@@ -79,10 +74,24 @@ define command {
 }
 
 define command {
-        command_name	check_disk_mount
-	command_line	{{ nagios.scripts_path }}/checks/check_disk_mount.sh $ARG1$
+        command_name    check_http_host_alive
+        command_line    $USER1$/check_http -H "$HOSTNAME$" -I "$HOSTADDRESS$" -p 443 -S --url / -t 5 -w 5 -c 10 -R "$HOSTNOTES$" -f follow
 }
 
+define command {
+        command_name    check_host_alive
+        command_line    $USER1$/check_ping -H $HOSTADDRESS$ -w 100.0,40% -c 250.0,60% -p 5
+}
+
+define command {
+        command_name	check_disk_mount
+	    command_line	{{ nagios.scripts_path }}/checks/check_disk_mount.sh $ARG1$
+}
+
+define command {
+	    command_name	check_domain_expiration
+	    command_line	{{ nagios.scripts_path }}/checks/check_domain_expiration.sh -d "$HOSTNAME$" -w $ARG1$ -c $ARG2$
+}
 
 ###############################################################################
 # COMMANDS.CFG - SAMPLE COMMAND DEFINITIONS FOR NAGIOS 4.4.6

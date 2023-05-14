@@ -56,10 +56,9 @@ MEM_WARN=$(echo $WARN | awk '{split($0,x,","); print x[1]}')
 MEM_CRIT=$(echo $CRIT | awk '{split($0,x,","); print x[1]}')
 SWAP_WARN=$(echo $WARN | awk '{split($0,x,","); print x[2]}')
 SWAP_CRIT=$(echo $CRIT | awk '{split($0,x,","); print x[2]}')
-SNMPGET_OUTPUT=$(snmpget -O qv -v 3 -l authPriv -u ${SNMP_USER} -a ${AUTH_PROTOCOL} -x ${PRIV_PROTOCOL} -A ${SNMP_PASSWORD} -X ${SNMP_PASSWORD} ${HOST_ADDRESS}:${SNMP_PORT} NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"meminfo\")
-MEM_FREE_AND_SWAP_FREE=$(echo "$SNMPGET_OUTPUT" | awk '{split($0,x,": "); print x[2]}')
-MEM_FREE=$(echo "$MEM_FREE_AND_SWAP_FREE" | awk '{split($0, x, "/"); print x[1]}')
-SWAP_FREE=$(echo "$MEM_FREE_AND_SWAP_FREE" | awk '{split($0, x, "/"); print x[2]}')
+SNMPGET_OUTPUT=$(snmpget -O qv -v 3 -l authPriv -u ${SNMP_USER} -a ${AUTH_PROTOCOL} -x ${PRIV_PROTOCOL} -A ${SNMP_PASSWORD} -X ${SNMP_PASSWORD} ${HOST_ADDRESS}:${SNMP_PORT} NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"check_meminfo\")
+MEM_FREE=$(echo "$SNMPGET_OUTPUT" | awk '{split($0, x, "/"); print x[1]}')
+SWAP_FREE=$(echo "$SNMPGET_OUTPUT" | awk '{split($0, x, "/"); print x[2]}')
 if [[ $MEM_FREE == +([[:digit:]]) ]]
 then
   MEM_USAGE=$((100-$MEM_FREE))
@@ -75,7 +74,7 @@ then
     MSG="OK: Memory usage ${MEM_USAGE}%${LINE_SEPARATOR}"
   fi
 else
-  OUTPUT=$(snmpwalk -O qv -v 3 -l authPriv -u ${SNMP_USER} -a ${AUTH_PROTOCOL} -x ${PRIV_PROTOCOL} -A ${SNMP_PASSWORD} -X ${SNMP_PASSWORD} ${HOST_ADDRESS}:${SNMP_PORT} NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"meminfo\")
+  OUTPUT=$(snmpwalk -O qv -v 3 -l authPriv -u ${SNMP_USER} -a ${AUTH_PROTOCOL} -x ${PRIV_PROTOCOL} -A ${SNMP_PASSWORD} -X ${SNMP_PASSWORD} ${HOST_ADDRESS}:${SNMP_PORT} NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"check_meminfo\")
   echo "CRITICAL: $OUTPUT"
   exit $NAGIOS_CRIT
 fi

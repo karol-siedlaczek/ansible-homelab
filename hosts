@@ -3,4 +3,4 @@ vps-01      ansible_host=185.221.108.183    ansible_connection=ssh
 homelab-pi  ansible_host=192.168.0.100      ansible_connection=ssh
 
 [nagios_hosts]
-homelab-pi  ansible_host=192.168.0.100      ansible_connection=ssh
+homelab-pi  ansible_host=78.10.222.152      ansible_connection=ssh

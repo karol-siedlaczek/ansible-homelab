@@ -1,0 +1,21 @@
+
+#- name: Get file from repo
+#  command: "git clone https://github.com/karol-siedlaczek/backup-tool.git > files/"
+#  delegate_to: localhost
+
+- name: Fetch backup-tool.py from repository
+  git:
+    repo: https://github.com/karol-siedlaczek/backup-tool.git
+    dest: /usr/local/bin/tests
+    clone: true
+    update: true
+
+- name: Fetch backup-tool.py from repository
+  git:
+    repo: https://github.com/karol-siedlaczek/backup-tool.git
+    dest: /usr/local/bin/tests
+    clone: true
+    update: true
+
+
+  #delegate_to: localhost

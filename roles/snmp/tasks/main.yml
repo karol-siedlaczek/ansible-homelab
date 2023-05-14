@@ -32,6 +32,17 @@
     replace: '\1+ALL'
   when: not snmp_mibs_downloader_apt.failed
 
+- name: Add extend scripts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ snmp_extends_path }}/"
+    mode: 0755
+    owner: root
+    group: root
+    force: true
+  with_filetree: files/extends/
+  when: item.state == 'file'
+
 - name: Start snmpd
   service:
     name: snmpd
@@ -42,5 +53,3 @@
     path: /etc/snmp/snmpd.conf
     regexp: '^createUser {{ snmp.user }} SHA "{{ snmp.password }}" AES "{{ snmp.password }}"'
     replace: ''
-
-#extend check_raid /usr/local/bin/nagios/check_raid.pl

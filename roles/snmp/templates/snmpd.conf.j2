@@ -4,5 +4,6 @@ rouser  {{ snmp.user }}  priv
 master          agentx
 agentaddress    udp:161,udp6:[::1]:161
 
-extend check_raid           /usr/local/bin/nagios/checks/check_raid.pl
-extend check_postfix_queue  /usr/local/bin/nagios/checks/check_postfix_queue.sh -w 1 -c 5
+extend  check_raid              {{ snmp_extends_path }}/check_raid.pl
+extend  check_meminfo           {{ snmp_extends_path }}/check_meminfo.sh
+extend  check_postfix_queue     {{ snmp_extends_path }}/check_postfix_queue.sh -w 1 -c 5
