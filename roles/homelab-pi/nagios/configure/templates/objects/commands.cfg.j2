@@ -55,7 +55,7 @@ define command {
 
 define command {
         command_name    check_snmp_extend
-        command_line    {{ nagios.scripts_path }}/checks/check_snmp_extend.sh $HOSTADDRESS$ 161 $USER2$ $USER3$ $ARG1$
+        command_line    {{ nagios.scripts_path }}/checks/check_snmp_extend.sh $HOSTADDRESS$ $USER2$ $USER3$ $ARG1$
 }
 
 define command {

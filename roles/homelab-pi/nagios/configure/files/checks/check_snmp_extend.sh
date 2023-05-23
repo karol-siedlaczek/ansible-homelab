@@ -1,22 +1,23 @@
 #!/bin/bash
 
-SNMP_HOST=$1
-SNMP_PORT=$2
-SNMP_USER=$3
-SNMP_PASS=$4
-EXTEND_NAME=$5
+set -ueo pipefail
 
-if [[ -z "$SNMP_HOST" || -z "$SNMP_PORT" || -z "$SNMP_USER" || -z "$SNMP_PASS" || -z "$EXTEND_NAME" ]]
+PATH=/bin:/usr/bin
+
+HOST=${1:-}
+USER=${2:-}
+PASS=${3:-}
+EXT=${4:-}
+
+if [[ -z "$HOST" || -z "$USER" || -z "$PASS" || -z "$EXT" ]]
 then
-   echo -e "Syntax error\nUsage: $0 <host> <port> <user> <pass> <extend>"
-   exit 0
+   echo "Usage: $0 <host> <user> <password> <extension>" >&2
+   exit 3
 fi
 
-# For output
-output=$(/usr/bin/snmpget -t 10 -OQv -l authPriv -u $SNMP_USER -A $SNMP_PASS -X $SNMP_PASS -x AES -a SHA $SNMP_HOST:$SNMP_PORT NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"$EXTEND_NAME\")
+SNMP_COMMON="snmpwalk -v 3 -u $USER -A $PASS -X $PASS -a SHA -x AES -l authPriv -Ov -Oq $HOST"
 
-# For exit code
-result=$(/usr/bin/snmpget -t 10 -OQv -l authPriv -u $SNMP_USER -A $SNMP_PASS -X $SNMP_PASS -x AES -a SHA $SNMP_HOST:$SNMP_PORT NET-SNMP-EXTEND-MIB::nsExtendResult.\"$EXTEND_NAME\")
+EXIT_CODE=$($SNMP_COMMON NET-SNMP-EXTEND-MIB::nsExtendResult.\"$EXT\")
+$SNMP_COMMON NET-SNMP-EXTEND-MIB::nsExtendOutputFull.\"$EXT\"
 
-echo $output
-echo $result
+exit $EXIT_CODE
