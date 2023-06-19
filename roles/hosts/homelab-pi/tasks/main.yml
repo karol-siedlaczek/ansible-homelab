@@ -6,16 +6,12 @@
 - name: Fetch backup-tool.py from repository
   git:
     repo: https://github.com/karol-siedlaczek/backup-tool.git
-    dest: /usr/local/bin/tests
-    clone: true
-    update: true
+    dest: /usr/local/bin/backup-tool
 
-- name: Fetch backup-tool.py from repository
+- name: Fetch remote-task.py from repository
   git:
     repo: https://github.com/karol-siedlaczek/backup-tool.git
     dest: /usr/local/bin/tests
-    clone: true
-    update: true
 
 
   #delegate_to: localhost

@@ -1,1 +1,54 @@
+- name: Install wireguard
+  apt:
+    name: wireguard
+    state: present
 
+- name: Check if private key exist
+  stat:
+    path: /etc/wireguard/private.key
+  register: priv_key_result
+
+- name: Set private key
+  block:
+    - name: Generate private key
+      command:
+        cmd: wg genkey
+      register: private_key
+
+    - name: Add private key
+      copy:
+        dest: /etc/wireguard/private.key
+        content: "{{ private_key.stdout }}"
+        mode: 0600
+        owner: root
+        group: root
+  when: not priv_key_result.stat.exists
+
+- name: Check if public key exist
+  stat:
+    path: /etc/wireguard/public.key
+  register: public_key_result
+
+- name: Set public key
+  block:
+    - name: Generate public key
+      shell: cat /etc/wireguard/private.key | wg pubkey
+      register: public_key
+
+    - name: Add public key
+      copy:
+        dest: /etc/wireguard/public.key
+        content: "{{ public_key.stdout }}"
+        mode: 0600
+        owner: root
+        group: root
+  when: not public_key_result.stat.exists
+
+- name: Set wg0.conf
+  template:
+    src: templates/wg0.conf.j2
+    dest: /etc/wireguard/wg0.conf
+    mode: 0740
+    owner: root
+    group: root
+    force: true
