@@ -1,0 +1,5 @@
+- include: nagios-setup.yml
+  tags: setup
+
+- include: nagios-configure.yml
+  tags: configure

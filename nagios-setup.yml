@@ -1,6 +1,0 @@
-- hosts: nagios_hosts
-  become: no
-  remote_user: root
-
-  roles:
-    - homelab-pi/nagios/setup

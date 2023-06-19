@@ -1,0 +1,13 @@
+rouser  {{ snmp.user }}  priv
+
+master          agentx
+
+{% if inventory_hostname in check_raid_hosts %}
+extend  check_raid              {{ snmp_extends_path }}/check_raid.pl
+{% endif %}
+{% if inventory_hostname in check_meminfo_hosts %}
+extend  check_meminfo           {{ snmp_extends_path }}/check_meminfo.sh
+{% endif %}
+{% if inventory_hostname in check_postfix_queue_hosts %}
+extend  check_postfix_queue     {{ snmp_extends_path }}/check_postfix_queue.sh -w 10 -c 15
+{% endif %}

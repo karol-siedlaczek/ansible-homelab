@@ -33,4 +33,4 @@
       environment: ""
 
   roles:
-    - create-service
+    - services/create-service

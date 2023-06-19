@@ -1,0 +1,58 @@
+- name: Install snmp and snmpd
+  apt:
+    name:
+      - snmp
+      - snmpd
+    state: present
+
+- name: Install snmp-mibs-downloader
+  apt:
+    name: snmp-mibs-downloader
+    state: present
+  ignore_errors: true
+  register: snmp_mibs_downloader_apt
+
+- include: extend_scripts.yml
+
+- name: Set snmpd.conf
+  template:
+    src: templates/snmpd.conf.j2
+    dest: /etc/snmp/snmpd.conf
+    owner: root
+    group: root
+    mode: 0655
+  notify:
+    - Restart snmpd
+
+- name: Set snmp.conf
+  replace:
+    path: /etc/snmp/snmp.conf
+    regexp: '^(mibs\s):'
+    replace: '\1+ALL'
+  when: not snmp_mibs_downloader_apt.failed
+
+- name: Check snmp v3 user
+  command:
+    cmd: grep -q 'usmUser .\+{{ snmp.user }}' /var/lib/snmp/snmpd.conf
+  check_mode: no
+  failed_when: no
+  changed_when: no
+  register: snmpv3_user
+
+- name: Set snmp v3 user
+  block:
+    - name: Stop snmpd
+      service:
+        name: snmpd
+        state: stopped
+
+    - name: Add createUser line
+      lineinfile:
+        dest: /var/lib/snmp/snmpd.conf
+        line: 'createUser {{ snmp.user }} SHA {{ snmp.password }} AES {{ snmp.password }}'
+
+    - name: Start snmpd
+      service:
+        name: snmpd
+        state: started
+  when: snmpv3_user.rc == 1

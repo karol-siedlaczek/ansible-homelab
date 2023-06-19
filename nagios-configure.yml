@@ -1,8 +1,0 @@
-#!/usr/bin/ansible-playbook --ask-vault-pass -i hosts
-
-- hosts: nagios_hosts
-  become: no
-  remote_user: root
-
-  roles:
-    - homelab-pi/nagios/configure

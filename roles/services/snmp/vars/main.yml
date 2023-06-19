@@ -1,0 +1,12 @@
+snmp_extends_path: /usr/local/bin/nagios/extends
+
+check_raid_hosts: [
+  "homelab-pi"
+]
+check_meminfo_hosts: [
+  "vps-01",
+  "homelab-pi"
+]
+check_postfix_queue_hosts: [
+  "vps-01"
+]
