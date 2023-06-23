@@ -1,0 +1,8 @@
+#!/usr/bin/ansible-playbook --ask-vault-pass -i hosts
+
+- hosts: vps-01
+  become: no
+  remote_user: root
+
+  roles:
+    - services/grafana

@@ -1,0 +1,66 @@
+- name: Install apache2
+  apt:
+    name: apache2
+    state: present
+
+- name: Set site config
+  template:
+    src: templates/apache.conf.j2
+    dest: /etc/apache2/sites-available/grafana.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify:
+   - Reload apache2
+
+- name: Copy int-access-grafana.conf
+  copy:
+    src: files/int-access-grafana.conf
+    dest: /etc/apache2/int-access-grafana.conf
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify:
+   - Reload apache2
+
+- name: Enable proxy module
+  apache2_module:
+    name: proxy
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Enable ssl module
+  apache2_module:
+    name: ssl
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Enable proxy_http module
+  apache2_module:
+    name: proxy_http
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Enable rewrite module
+  apache2_module:
+    name: rewrite
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Get enabled site configs
+  command:
+    cmd: apachectl -t -D DUMP_VHOSTS
+  register: en_site_dump
+
+- name: Enable site config
+  command:
+    cmd: a2ensite grafana.conf
+  when: "'/etc/apache2/sites-enabled/grafana.{{ domain }}.conf' not in en_site_dump.stdout"
+  notify:
+   - Reload apache2

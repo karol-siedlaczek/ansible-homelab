@@ -1,0 +1,53 @@
+- name: Get apt key
+  get_url:
+    url: https://repos.influxdata.com/influxdata-archive_compat.key
+    dest: /usr/share/keyrings/influxdb.key
+    checksum: sha256:393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c
+
+- name: Set apt repository
+  apt_repository:
+    repo: deb [signed-by=/usr/share/keyrings/influxdb.key] https://repos.influxdata.com/debian stable main
+    filename: influxdb
+
+- name: Update apt
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install influxdb
+  apt:
+    name: influxdb
+    state: present
+
+- name: Set dir in influxdb.conf
+  replace:
+    path: /etc/influxdb/influxdb.conf
+    regexp: (dir\s=\s")[a-zA-Z0-9\/]+(\/[a-z]+)
+    replace: "\\1{{ influx.storage_path }}\\2"
+  notify:
+    - Restart influxdb
+
+- name: Change permission in storage path
+  file:
+    path: "{{ influx.storage_path }}"
+    owner: influxdb
+    group: root
+
+- name: Enable influxdb.service
+  systemd:
+    name: influxdb.service
+    enabled: true
+  notify:
+   - Reload systemd
+
+- name: Start influxdb
+  service:
+    name: influxdb
+    state: started
+
+- name: Create influx user and database
+  include_tasks:
+    file: create_user_and_db.yml
+  with_items:
+    - { database: "{{ accounts.haproxy.database }}", user: "{{ accounts.haproxy.user }}", password: "{{ accounts.haproxy.password }}" }
+  tags: config-influx-user-and-db

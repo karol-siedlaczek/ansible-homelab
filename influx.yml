@@ -1,0 +1,6 @@
+- hosts: vps-01
+  become: no
+  remote_user: root
+
+  roles:
+    - services/influx

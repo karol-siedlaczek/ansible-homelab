@@ -1,0 +1,37 @@
+<VirtualHost grafana.{{ domain }} :80>
+        ServerName              grafana.{{ domain }}
+        ServerAdmin             admin@{{ domain }}
+
+        ErrorLog                ${APACHE_LOG_DIR}/error-grafana.log
+        CustomLog               ${APACHE_LOG_DIR}/access-grafana.log combined
+
+        RewriteEngine           On
+        RewriteCond             %{SERVER_NAME} =grafana.{{ domain }}
+        RewriteRule             ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+        <VirtualHost grafana.{{ domain }}:443>
+                ServerName              grafana.{{ domain }}
+                ServerAdmin             admin@{{ domain }}
+
+                ErrorLog                ${APACHE_LOG_DIR}/error-grafana-ssl.log
+                CustomLog               ${APACHE_LOG_DIR}/access-grafana-ssl.log combined
+
+                <Proxy *>
+                        Order deny,allow
+                        Allow from all
+                </Proxy>
+
+                ProxyRequests           Off
+                ProxyPreserveHost       On
+                ProxyPass               /       http://localhost:{{ port }}/
+                ProxyPassReverse        /       http://localhost:{{ port }}/
+
+                Include                 /etc/letsencrypt/options-ssl-apache.conf
+                SSLCertificateFile      /etc/letsencrypt/live/grafana.{{ domain }}/fullchain.pem
+                SSLCertificateKeyFile   /etc/letsencrypt/live/grafana.{{ domain }}/privkey.pem
+
+                Include int-access-grafana.conf
+        </VirtualHost>
+</IfModule>

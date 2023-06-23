@@ -1,0 +1,8 @@
+- name: Restart influxdb
+  service:
+    name: influxdb
+    state: restarted
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true

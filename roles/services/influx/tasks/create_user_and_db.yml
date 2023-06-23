@@ -1,0 +1,23 @@
+- name: Get databases
+  command:
+    cmd: influx -execute 'SHOW DATABASES'
+  register: influx_dbs
+  tags: config-influx-user-and-db
+
+- name: Create database
+  command:
+    cmd: "influx -execute 'CREATE DATABASE {{ item.database }}'"
+  when: "'{{ item.database }}' not in influx_dbs.stdout_lines"
+  tags: config-influx-user-and-db
+
+- name: Get existing users
+  command:
+    cmd: influx -execute 'SHOW USERS'
+  register: influx_users
+  tags: config-influx-user-and-db
+
+- name: Create user
+  command:
+    cmd: influx -database {{ item.database }} -execute "CREATE USER "{{ item.user }}" WITH PASSWORD '{{ item.password }}' WITH ALL PRIVILEGES"
+  when: "'{{ item.user }}' not in influx_users.stdout_lines"
+  tags: config-influx-user-and-db

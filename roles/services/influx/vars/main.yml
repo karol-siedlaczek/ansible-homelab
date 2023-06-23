@@ -1,0 +1,11 @@
+storage_path: "/var/storage/influx"
+
+accounts:
+  haproxy:
+    database: "database"
+    user: "user"
+    password: "pass"
+  other:
+    database: "database"
+    user: "user"
+    password: "pass"
