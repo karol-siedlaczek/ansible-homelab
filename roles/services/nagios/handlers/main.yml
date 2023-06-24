@@ -15,5 +15,5 @@
 
 - name: Restart nagios
   service:
-    name: "nagios{{nagios.version}}"
+    name: "nagios{{ nagios.version }}"
     state: restarted

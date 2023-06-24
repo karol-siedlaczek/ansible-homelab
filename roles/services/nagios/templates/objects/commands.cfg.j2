@@ -64,6 +64,11 @@ define command {
 }
 
 define command {
+        command_name    check_snmp_service
+        command_line    {{ nagios.scripts_path }}/checks/check_snmp_service.sh -H $HOSTADDRESS$ -l $USER2$ -X $USER3$ -s $ARG1$
+}
+
+define command {
          command_name	check_ssl_cert
          command_line	{{ nagios.scripts_path }}/checks/check_ssl_cert.sh -h $HOSTNAME$ -w $ARG1$ -c $ARG2$
 }
