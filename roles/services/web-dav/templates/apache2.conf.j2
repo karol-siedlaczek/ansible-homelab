@@ -1,0 +1,39 @@
+DavLockDB /var/www/webdav.{{ domain }}/var/DavLock
+
+<VirtualHost webdav.{{ domain }}:80>
+        ServerName              webdav.{{ domain }}
+        ServerAdmin             admin@{{ domain }}
+
+        ErrorLog                ${APACHE_LOG_DIR}/error-webdav.log
+        CustomLog               ${APACHE_LOG_DIR}/access-webdav.log combined
+
+        RewriteEngine           On
+        RewriteCond             %{SERVER_NAME} =webdav.{{ domain }}
+        RewriteRule             ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+        <VirtualHost webdav.{{ domain }}:443>
+                ServerName              webdav.{{ domain }}
+                ServerAlias             webdav.{{ domain }}
+                ServerAdmin             admin@{{ domain }}
+
+                ErrorLog                ${APACHE_LOG_DIR}/error-webdav-ssl.log
+                CustomLog               ${APACHE_LOG_DIR}/access-webdav-ssl.log combined
+
+                DocumentRoot            /var/www/webdav.{{ domain }}/data
+                Alias                   /webdav       /var/www/webdav.{{ domain }}/data
+
+                <Directory /var/www/webdav.{{ domain }}/data>
+                    DAV                 On
+                    AuthType            Digest
+                    AuthName            "webdav"
+                    AuthUserFile        /var/www/.htdigest-webdav
+                    Require             valid-user
+                </Directory>
+
+                Include                 /etc/letsencrypt/options-ssl-apache.conf
+                SSLCertificateFile      /etc/letsencrypt/live/webdav.{{ domain }}/fullchain.pem
+                SSLCertificateKeyFile   /etc/letsencrypt/live/webdav.{{ domain }}/privkey.pem
+        </VirtualHost>
+</IfModule>

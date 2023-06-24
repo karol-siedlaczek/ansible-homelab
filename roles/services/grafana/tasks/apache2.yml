@@ -5,8 +5,8 @@
 
 - name: Set site config
   template:
-    src: templates/apache.conf.j2
-    dest: /etc/apache2/sites-available/grafana.conf
+    src: templates/apache2.conf.j2
+    dest: "/etc/apache2/sites-available/grafana.{{ domain }}.conf"
     owner: root
     group: root
     mode: 0644
@@ -60,7 +60,7 @@
 
 - name: Enable site config
   command:
-    cmd: a2ensite grafana.conf
+    cmd: "a2ensite grafana.{{ domain }}.conf"
   when: "'/etc/apache2/sites-enabled/grafana.{{ domain }}.conf' not in en_site_dump.stdout"
   notify:
    - Reload apache2

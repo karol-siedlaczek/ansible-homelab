@@ -1,0 +1,130 @@
+# sshd_config(5) for more information.
+
+Include /etc/ssh/sshd_config.d/*.conf
+Subsystem       sftp    internal-sftp
+
+# internal connections
+Port 22
+
+# external connections
+Port 2222
+
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+
+AllowAgentForwarding yes
+AllowTcpForwarding yes
+X11Forwarding yes
+
+# any for all, inet for IPv4, inet6 for IPv6
+AddressFamily any
+
+# no due to security reasons
+ChallengeResponseAuthentication no
+
+# it allows to run sshd as a non-root user, also allows to perform password auth by non-root user
+UsePAM yes
+
+# Specifiec what enviroment variables sent by the client will be copied into the session (envirion(7), recommend to SendEnv and SetEnv
+AcceptEnv LANG LC_*
+
+# Specifies wheter shhd chosuld print /etc/motd when user logs in interactively
+PrintMotd no
+
+# AllowUsers root storage keepass
+
+Match LocalPort 22
+        AllowGroups ssh-int
+
+Match LocalPort 2222
+        AllowGroups ssh-ext
+
+Match User storage
+        ForceCommand internal-sftp -u 0022
+        ChrootDirectory /var/storage/hdd
+        PermitTunnel no
+        X11Forwarding no
+
+Match Group ssh-ext
+        ForceCommand internal-sftp -u 0022
+        PasswordAuthentication yes
+        PubkeyAuthentication no
+        PermitTunnel no
+        X11Forwarding no
+
+Match Group sftp-users
+        ChrootDirectory /var/storage/ssd/sftp/%u
+
+Match Group domain-users
+        ChrootDirectory /var/storage/ssd/domains/%u
+
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+
+#HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_ecdsa_key
+#HostKey /etc/ssh/ssh_host_ed25519_key
+
+# Ciphers and keying
+#RekeyLimit default none
+
+# Logging
+#SyslogFacility AUTH
+#LogLevel INFO
+
+# Authentication:
+#LoginGraceTime 2m
+#PermitRootLogin prohibit-password
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+
+# Expect .ssh/authorized_keys2 to be disregarded by default in future.
+#AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys2
+
+#AuthorizedPrincipalsFile none
+
+#AuthorizedKeysCommand none
+#AuthorizedKeysCommandUser nobody
+
+# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+#HostbasedAuthentication no
+
+# Change to yes if you don't trust ~/.ssh/known_hosts for
+#HostbasedAuthentication
+#IgnoreUserKnownHosts no
+
+# Don't read the user's ~/.rhosts and ~/.shosts files
+#IgnoreRhosts yes
+
+# Kerberos options
+#KerberosAuthentication no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+
+# GSSAPI options
+#GSSAPIAuthentication no
+#GSSAPICleanupCredentials yes
+#GSSAPIStrictAcceptorCheck yes
+#GSSAPIKeyExchange no
+
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
+#GatewayPorts no
+#X11DisplayOffset 10
+#X11UseLocalhost yes
+#PermitTTY yes
+#PrintLastLog yes
+#TCPKeepAlive yes
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
+#ClientAliveCountMax 3
+#UseDNS no
+#PidFile /var/run/sshd.pid
+#MaxStartups 10:30:100
+
+# no default banner path
+#Banner none

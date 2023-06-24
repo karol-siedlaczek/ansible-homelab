@@ -1,0 +1,78 @@
+- name: Install apache2
+  apt:
+    name: apache2
+    state: present
+
+- name: Set site config
+  template:
+    src: templates/apache2.conf.j2
+    dest: "/etc/apache2/sites-available/webdav.{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify:
+   - Reload apache2
+
+- name: Enable dav module
+  apache2_module:
+    name: dav
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Enable dav_fs module
+  apache2_module:
+    name: dav_fs
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Enable auth_digest module
+  apache2_module:
+    name: auth_digest
+    state: present
+  notify:
+   - Reload apache2
+
+- name: Create directory for locking files
+  file:
+    path: "/var/www/webdav.{{ domain }}/var"
+    state: directory
+    owner: root
+    group: root
+    mode: 0750
+
+- name: Create directory for data
+  file:
+    path: "/var/www/webdav.{{ domain }}/data"
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Create htdigest file
+  file:
+    path: /var/www/.htdigest-webdav
+    owner: root
+    group: www-data
+    mode: 0640
+    state: touch
+
+- name: Create DavLock file
+  file:
+    path: "/var/www/webdav.{{ domain }}/var/DavLock"
+    owner: root
+    group: www-data
+    mode: 0660
+
+- name: Get enabled site configs
+  command:
+    cmd: apachectl -t -D DUMP_VHOSTS
+  register: en_site_dump
+
+- name: Enable site config
+  command:
+    cmd: "a2ensite webdav.{{ domain }}.conf"
+  when: "'/etc/apache2/sites-enabled/webdav.{{ domain }}.conf' not in en_site_dump.stdout"
+  notify:
+   - Reload apache2
