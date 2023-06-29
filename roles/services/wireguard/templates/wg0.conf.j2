@@ -1,5 +1,5 @@
 [Interface]
-PrivateKey = {{ lookup('file', '/etc/wireguard/private.key') | replace('\n', '\\n') }}  #TODO
+PrivateKey = {{ private_key['content'] | b64decode }}
 Address = {{ address }}
 ListenPort = {{ listen_port }}
 SaveConfig = true
