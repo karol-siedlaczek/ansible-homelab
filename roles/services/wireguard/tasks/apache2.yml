@@ -1,0 +1,41 @@
+- name: Install apache2
+  apt:
+    name: apache2
+    state: present
+
+- name: Set site config
+  template:
+    src: templates/apache2.conf.j2
+    dest: "/etc/apache2/sites-available/vpn.{{ apache.domain }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+  notify:
+   - Reload apache2
+
+- name: Enable apache2 modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ modules }}"
+  vars:
+    modules:
+      - ssl
+      - rewrite
+      - proxy_http
+      - proxy
+  notify:
+   - Reload apache2
+
+- name: Get enabled site configs
+  command:
+    cmd: apachectl -t -D DUMP_VHOSTS
+  register: en_site_dump
+
+- name: Enable site config
+  command:
+    cmd: "a2ensite vpn.{{ apache.domain }}.conf"
+  when: "'/etc/apache2/sites-enabled/vpn.{{ apache.domain }}.conf' not in en_site_dump.stdout"
+  notify:
+   - Reload apache2

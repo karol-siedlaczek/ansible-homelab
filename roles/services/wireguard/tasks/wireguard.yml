@@ -1,0 +1,94 @@
+- name: Install wireguard
+  apt:
+    name: wireguard
+    state: present
+
+- name: Edit sysctl.conf to turn on IPv4 forwarding#
+  replace:
+    path: /etc/sysctl.conf
+    regexp: '^[#]?(net\.ipv4\.ip_forward=)[0-9]{1}'
+    replace: '\g<1>1'
+
+- name: Edit sysctl.conf to turn on IPv6 forwarding#
+  replace:
+    path: /etc/sysctl.conf
+    regexp: '^[#]?(net\.ipv6\.conf.all.forwarding=)[0-9]{1}'
+    replace: '\g<1>1'
+
+- name: Create base directory
+  file:
+    path: "{{ wg.base_path }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Create scripts directory
+  file:
+    path: "{{ wg.scripts_path }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Copy scripts
+  copy:
+    src: "files/{{ item.script_name }}"
+    dest: "{{ wg.scripts_path }}/{{ item.script_name }}"
+    mode: 0755
+    owner: root
+    group: root
+  with_items:
+   - { script_name: post-up.sh }
+   - { script_name: post-down.sh }
+
+- name: Download wireguard-ui
+  get_url:
+    url: https://github.com/ngoduykhanh/wireguard-ui/releases/download/v0.5.2/wireguard-ui-v0.5.2-linux-arm.tar.gz
+    dest: "{{ wg.scripts_path }}"
+    checksum: sha256:b15c8ff43d09fa1d63aa63aa185a8a5b9f4ece02ebf67e9aa5152888d4a6be6b
+  register: wireguard_ui_tar
+
+- name: "Unarchive '{{ wireguard_ui_tar.dest }}' package"
+  unarchive:
+    src: "{{ wireguard_ui_tar.dest }}"
+    dest: "{{ wg.scripts_path }}"
+    remote_src: true
+
+- name: "Delete '{{ wireguard_ui_tar.dest }}' package"
+  file:
+    path: "{{ wireguard_ui_tar.dest }}"
+    state: absent
+
+- name: Set wg-gui.service
+  template:
+    src: templates/wg-gui.service.j2
+    dest: /lib/systemd/system/wg-gui.service
+    owner: root
+    group: root
+    mode: 0644
+    force: true
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Enable wg-gui.service
+  systemd:
+    name: wg-gui.service
+    enabled: true
+
+- name: Start wg-gui.service
+  systemd:
+    name: wg-gui.service
+    state: started
+
+- name: Enable wg-quick@wg0.service
+  systemd:
+    name: wg-quick@wg0.service
+    enabled: true
+
+- name: Start wg-quick@wg0.service
+  systemd:
+    name: wg-quick@wg0.service
+    state: started

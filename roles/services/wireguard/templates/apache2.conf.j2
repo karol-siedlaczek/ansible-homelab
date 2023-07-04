@@ -1,0 +1,35 @@
+<VirtualHost *:80>
+        ServerName              vpn.{{ apache.domain  }}
+        ServerAdmin             admin@{{ apache.domain  }}
+
+        ErrorLog                ${APACHE_LOG_DIR}/error-vpn.log
+        CustomLog               ${APACHE_LOG_DIR}/access-vpn.log combined
+
+        RewriteEngine           On
+        RewriteCond             %{SERVER_NAME} =vpn.{{ apache.domain  }}
+        RewriteRule             ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+        <VirtualHost *:443>
+                ServerName              vpn.{{ apache.domain  }}
+                ServerAdmin             admin@{{ apache.domain  }}
+
+                ErrorLog                ${APACHE_LOG_DIR}/error-vpn-ssl.log
+                CustomLog               ${APACHE_LOG_DIR}/access-vpn-ssl.log combined
+
+                <Proxy *>
+                        Order deny,allow
+                        Allow from all
+                </Proxy>
+
+                ProxyRequests           Off
+                ProxyPreserveHost       On
+                ProxyPass               /       http://localhost:5000/
+                ProxyPassReverse        /       http://localhost:5000/
+
+                Include                 /etc/letsencrypt/options-ssl-apache.conf
+                SSLCertificateFile      /etc/letsencrypt/live/vpn.{{ apache.domain }}/fullchain.pem
+                SSLCertificateKeyFile   /etc/letsencrypt/live/vpn.{{ apache.domain }}/privkey.pem
+        </VirtualHost>
+</IfModule>

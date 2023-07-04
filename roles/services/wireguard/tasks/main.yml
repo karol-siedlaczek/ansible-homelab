@@ -1,85 +1,10 @@
-- name: Install wireguard
+- name: Update apt
   apt:
-    name: wireguard
-    state: present
+    update_cache: true
+    cache_valid_time: 3600
 
-- name: Check if private key exist
-  stat:
-    path: /etc/wireguard/private.key
-  register: priv_key_result
+- include: wireguard.yml
+  tags: config-wireguard
 
-- name: Set private key
-  block:
-    - name: Generate private key
-      command:
-        cmd: wg genkey
-      register: private_key
-
-    - name: Add private key
-      copy:
-        dest: /etc/wireguard/private.key
-        content: "{{ private_key.stdout }}"
-        mode: 0600
-        owner: root
-        group: root
-  when: not priv_key_result.stat.exists
-
-- name: Check if public key exist
-  stat:
-    path: /etc/wireguard/public.key
-  register: public_key_result
-
-- name: Set public key
-  block:
-    - name: Generate public key
-      shell: cat /etc/wireguard/private.key | wg pubkey
-      register: public_key
-
-    - name: Add public key
-      copy:
-        dest: /etc/wireguard/public.key
-        content: "{{ public_key.stdout }}"
-        mode: 0600
-        owner: root
-        group: root
-  when: not public_key_result.stat.exists
-
-- name: Get private key
-  slurp:
-    src: /etc/wireguard/private.key
-  register: private_key
-
-- name: Set wg0.conf
-  template:
-    src: templates/wg0.conf.j2
-    dest: /etc/wireguard/wg0.conf
-    mode: 0640
-    owner: root
-    group: root
-    force: true
-
-- name: Edit sysctl.conf to turn on IPv4 forwarding#
-  replace:
-    path: /etc/sysctl.conf
-    regexp: '^[#]?(net\.ipv4\.ip_forward=)[0-9]{1}'
-    replace: '\g<1>1'
-    force: true
-  tags: test
-
-- name: Edit sysctl.conf to turn on IPv6 forwarding#
-  replace:
-    path: /etc/sysctl.conf
-    regexp: '^[#]?(net\.ipv6\.conf.all.forwarding=)[0-9]{1}'
-    replace: '\g<1>1'
-    force: true
-  tags: test
-
-#- name: Start wg-quick.target
-#  service:
-#    name: wg-quick.target
-#    state: started
-#
-#- name: Enable wg-quick.target
-#  service:
-#    name: wg-quick.target
-#    enabled: true
+- include: apache2.yml
+  tags: config-apache
