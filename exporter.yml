@@ -1,0 +1,6 @@
+- hosts: homelab_hosts
+  become: no
+  remote_user: root
+
+  roles:
+    - services/exporter

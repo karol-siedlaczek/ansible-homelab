@@ -1,0 +1,131 @@
+- name: Create install directory
+  file:
+    path: "{{ base_path }}"
+    state: directory
+
+- name: "Check if other {{ name }} exporter instance exists in {{ base_path }}"
+  stat:
+    path: "{{ base_path }}/{{ name }}"
+  register: old_exporter
+
+- name: "Remove old {{ name }} exporter instance"
+  file:
+    path: "{{ base_path }}/{{ name }}"
+    state: absent
+  when: old_exporter.stat.exists
+
+- name: Create group
+  group:
+    name: "{{ name }}"
+  register: group
+
+- name: Create user
+  user:
+    name: "{{ name }}"
+    shell: /bin/false
+    group: "{{ name }}"
+    create_home: false
+  register: user
+
+- name: "Download {{ name }} from '{{ download_url }}'"
+  get_url:
+    url: " {{ download_url }}"
+    dest: "{{ base_path }}"
+    checksum: "sha256:{{ sha256sum }}"
+  register: download_result
+
+- name: "Unarchive '{{ download_result.dest }}' package"
+  unarchive:
+    src: "{{ download_result.dest }}"
+    dest: "{{ base_path }}"
+    mode: 0644
+    owner: root
+    group: root
+    remote_src: true
+    list_files: yes
+  register: unarchive_result
+
+- name: "Remove package {{ download_result.dest }}"
+  file:
+    path: "{{ download_result.dest }}"
+    state: absent
+
+- name: "Copy {{ name }} files to '{{ base_path}}/{{ name }}'"
+  copy:
+    src: "{{ base_path }}/{{ unarchive_result.files[0] }}"
+    dest: "{{ base_path }}/{{ name }}"
+    remote_src: true
+    owner: "{{ user.name }}"
+    group: "{{ group.name }}"
+    mode: 644
+
+- name: "Remove old directory for {{ name }}"
+  file:
+    path: "{{ base_path }}/{{ unarchive_result.files[0] }}"
+    state: absent
+
+- name: "Set permissions on {{ base_path }}/{{ name }}"
+  file:
+    path: "{{ base_path }}/{{ name }}"
+    state: directory
+    mode: 0755
+    recurse: true
+    owner: "{{ user.name }}"
+    group: "{{ group.name }}"
+
+- name: "Set permissions on {{ base_path }}/{{ name }}/{{ name }}"
+  file:
+    path: "{{ base_path }}/{{ name }}/{{ name }}"
+    state: file
+    mode: 0755
+
+- name: Set config file
+  block:
+    - name: Set predefined config file by hostname
+      copy:
+        src: "files/{{ inventory_hostname }}/{{ config_file }}"
+        dest: "{{ base_path }}/{{ name }}/{{ config_file }}"
+        owner: root
+        group: root
+        mode: 0644
+      ignore_errors: true
+      register: predefined_config_file
+
+    - name: Set default config file
+      copy:
+        src: "files/{{ config_file }}"
+        dest: "{{ base_path }}/{{ name }}/{{ config_file }}"
+        owner: root
+        group: root
+        mode: 0644
+      when: predefined_config_file.failed
+  when: config_file is defined
+
+- name: "Set /etc/init.d/{{ name }}"
+  template:
+    src: templates/init.sh.j2
+    dest: "/etc/init.d/{{ name }}"
+    owner: "{{ user.name }}"
+    group: "{{ group.name }}"
+    mode: 0744
+
+- name: "Set {{ name }}.service"
+  template:
+    src: templates/service.j2
+    dest: "/lib/systemd/system/{{ name }}.service"
+    owner: "{{ user.name }}"
+    group: "{{ group.name }}"
+    mode: 0744
+    force: true
+  notify:
+    - Reload systemd
+
+- name: "Enable {{ name }}.service"
+  systemd:
+    name: "{{ name }}.service"
+    enabled: true
+
+- name: "Start {{ name }}.service"
+  systemd:
+    name: "{{ name }}.service"
+    state: started

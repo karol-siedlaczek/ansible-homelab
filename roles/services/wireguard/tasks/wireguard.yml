@@ -83,12 +83,12 @@
     name: wg-gui.service
     state: started
 
-- name: Enable wg-quick@wg0.service
+- name: "Enable wg-quick@wg{{ wg.interface_number }}.service"
   systemd:
-    name: wg-quick@wg0.service
+    name: "wg-quick@wg{{ wg.interface_number }}.service"
     enabled: true
 
-- name: Start wg-quick@wg0.service
+- name: "Start wg-quick@wg{{ wg.interface_number }}.service"
   systemd:
-    name: wg-quick@wg0.service
+    name: "wg-quick@wg{{ wg.interface_number }}.service"
     state: started

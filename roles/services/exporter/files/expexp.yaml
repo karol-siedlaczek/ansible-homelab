@@ -1,0 +1,10 @@
+modules:
+  node:
+    method: http
+    http:
+      port: 9100
+
+  process:
+    method: http
+    http:
+      port: 9256

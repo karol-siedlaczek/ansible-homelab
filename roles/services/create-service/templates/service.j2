@@ -5,11 +5,11 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-User={{ user.name }}
-Group={{ group.name }}
-ExecStart={{ service.start_cmd }}
+User={{ name }}
+Group={{ name }}
+ExecStart={{ service.start_command }}
 SyslogIdentifier={{ name }}
-{% if service.environment is defined %} Environment="{{ service.environment }}" {% endif %}
+Environment="{{ service.environment }}"
 Restart=always
 RestartSec=1
 

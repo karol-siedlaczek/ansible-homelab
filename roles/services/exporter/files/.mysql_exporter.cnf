@@ -1,0 +1,7 @@
+[client]
+user = mysql_exporter
+password = <some_pass>
+
+[server]
+user = mysql_exporter
+password = <some_pass>

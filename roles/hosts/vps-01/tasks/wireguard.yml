@@ -1,0 +1,10 @@
+- name: Install wireguard
+  apt:
+    name: wireguard
+    state: present
+
+- name: Install resolvconf
+  apt:
+    name: resolvconf
+    state: present
+

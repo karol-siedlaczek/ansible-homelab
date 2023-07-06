@@ -1,71 +1,69 @@
-- name: "Create {{ service_name }} group"
+- name: "Create {{ name }} group"
   group:
-    name: "{{ group }}"
+    name: "{{ name }}"
 
-- name: "Create {{ service_name }} user"
+- name: "Create {{ name }} user"
   user:
-    name: "{{ user }}"
-    group: "{{ group }}"
+    name: "{{ name }}"
+    group: "{{ name }}"
     shell: /bin/false
     create_home: false
 
-- name: "Check if {{ service_name }}.service file exists"
+- name: "Check if {{ name }}.service file exists"
   stat:
-    path: "/lib/systemd/system/{{ service_name }}.service"
+    path: "/lib/systemd/system/{{ name }}.service"
   register: old_service_file
 
-- name: "Remove old {{ service_name }}.service file"
+- name: "Remove old {{ name }}.service file"
   file:
-    path: "/lib/systemd/system/{{ service_name }}.service"
+    path: "/lib/systemd/system/{{ name }}.service"
     state: absent
   when: old_service_file.stat.exists
 
-- name: "Check if /etc/init.d/{{ service_name }} file exists"
+- name: "Check if /etc/init.d/{{ name }} file exists"
   stat:
-    path: "/etc/init.d/{{ service_name }}"
+    path: "/etc/init.d/{{ name }}"
   register: old_init_script
 
-- name: "Remove old /etc/init.d/{{ service_name }} file"
+- name: "Remove old /etc/init.d/{{ name }} file"
   file:
-    path: "/etc/init.d/{{ service_name }}"
+    path: "/etc/init.d/{{ name }}"
     state: absent
   when: old_init_script.stat.exists
 
-- name: Create systemd {{ service_name }}.service file
+- name: Create systemd {{ name }}.service file
   template:
-    src: "{{ template.service }}"
-    dest: "/lib/systemd/system/{{ service_name }}.service"
-    owner: "{{ user }}"
-    group: "{{ group }}"
+    src: templates/service.j2
+    dest: "/lib/systemd/system/{{ name }}.service"
+    owner: "{{ name }}"
+    group: "{{ name }}"
     mode: 0744
 
-- name: "Add {{ service_name }}.service to autostart"
+- name: "Add {{ name }}.service to autostart"
   file:
-    src: "/lib/systemd/system/{{ service_name }}.service"
-    dest: "/etc/systemd/system{{ service_name }}.service"
+    src: "/lib/systemd/system/{{ name }}.service"
+    dest: "/etc/systemd/system{{ name }}.service"
     state: link
     force: yes
-    owner: "{{ user }}"
-    group: "{{ group }}"
-  when: startup == "y"
+    owner: "{{ name }}"
+    group: "{{ name }}"
   notify:
-    - reload systemd
+    - Reload systemd
 
-- name: "Enable {{ service_name }}.service"
+- name: "Enable {{ name }}.service"
   systemd:
-    name: "{{ service_name }}.service"
+    name: "{{ name }}.service"
     enabled: true
-  when: startup == "y"
 
-- name: "Start {{ service_name }}.service"
+- name: "Start {{ name }}.service"
   systemd:
-    name: "{{ service_name }}.service"
+    name: "{{ name }}.service"
     state: started
 
-- name: "Create /etc/init.d/{{ service_name }} script"
+- name: "Create /etc/init.d/{{ name }} script"
   template:
-    src: "{{ template.init }}"
-    dest: "/etc/init.d/{{ service_name }}"
-    owner: "{{ user }}"
-    group: "{{ group }}"
+    src: templates/init.sh.j2
+    dest: "/etc/init.d/{{ name }}"
+    owner: "{{ name }}"
+    group: "{{ name }}"
     mode: 0744

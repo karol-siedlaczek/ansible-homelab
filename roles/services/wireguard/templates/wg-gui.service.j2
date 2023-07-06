@@ -1,9 +1,9 @@
 [Unit]
 Description=wireguard-ui
 After=network.target
-After=wg-quick@wg0.service
-Requires=wg-quick@wg0.service
-PartOf=wg-quick@wg0.service
+After=wg-quick@wg{{ wg.interface_number }}.service
+Requires=wg-quick@wg{{ wg.interface_number }}.service
+PartOf=wg-quick@wg{{ wg.interface_number }}.service
 
 [Service]
 Type=simple
@@ -14,7 +14,7 @@ Environment=WGUI_SERVER_LISTEN_PORT="{{ wg.listen_port }}"
 Environment=WGUI_SERVER_INTERFACE_ADDRESSES="{{ wg.cidr }}"
 Environment=WGUI_SERVER_POST_UP_SCRIPT="{{ wg.scripts_path }}/post-up.sh"
 Environment=WGUI_SERVER_POST_DOWN_SCRIPT="{{ wg.scripts_path }}/post-down.sh"
-Environment=WGUI_CONFIG_FILE_PATH="/etc/wireguard/wg0.conf"
+Environment=WGUI_CONFIG_FILE_PATH="/etc/wireguard/wg{{ wg.interface_number }}.conf"
 Environment=WGUI_DNS="{{ wg.dns_host }}"
 Environment=SMTP_PASSWORD="{{ smtp.password }}"
 ExecStart={{ wg.scripts_path }}/wireguard-ui -bind-address 0.0.0.0:5000 -smtp-hostname {{ smtp.hostname }} -smtp-port {{ smtp.port }} -smtp-username "{{ smtp.username }}" -smtp-auth-type {{ smtp.auth_type }} -smtp-encryption {{ smtp.encryption }} -email-from "{{ smtp.username }}" -email-from-name "{{ wg.email_from_name }}"

@@ -1,72 +1,109 @@
-# my global config
 global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-  # scrape_timeout is set to the global default (10s).
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          # - alertmanager:9093
+#alerting:
+#  alertmanagers:
+#    - static_configs:
+#        - targets:
+#           - alertmanager:9093
 
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+#rule_files:
+#   - "first_rules.yml"
+#   - "second_rules.yml"
 
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
 scrape_configs:
-  - job_name: vps-01_django-service-desk
-    metrics_path: '/metrics'
+  - job_name: django-service-desk
+    metrics_path: /proxy
+    params:
+      module:
+        - service-desk
     static_configs:
-      - targets: ['127.0.0.1:8000']
-        labels:
-          hostname: vps-01
-
-#  - job_name: vps-01_django-ergobhp
-#    metrics_path: '/metrics'
-#    static_configs:
-#      - targets: ['127.0.0.1:8001']
-#       labels:
-#         hostname: vps-01
-
-  - job_name: vps-01_node-exporter
-    static_configs:
-      - targets: ['127.0.0.1:9100']
-        labels:
-          hostname: vps-01
-
-  - job_name: vps-01_mysql-exporter
-    static_configs:
-      - targets: ['127.0.0.1:9104']
-        labels:
-          hostname: vps-01
+      - targets:
+          - 'vps-01:9999'
     relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - target_label: __address__
-        replacement: localhost:9104
+      - source_labels: [ __address__ ]
+        regex: '(.*):.*'
+        replacement: $1
+        target_label: hostname
 
-  - job_name: vps-01_postgres_exporter
+  - job_name: postgres_exporter
+    metrics_path: /proxy
+    params:
+      module:
+        - postgres
     static_configs:
-      - targets: ['127.0.0.1:9187']
-        labels:
-          hostname: vps-01
-    metric_relabel_configs:
-    - source_labels: [datname]
-      regex: 'template[0-9]{1}'
-      action: drop
+      - targets:
+          - 'vps-01:9999'
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        regex: '(.*):.*'
+        replacement: $1
+        target_label: hostname
 
-  - job_name: vps-01_process_exporter
+  - job_name: mysql_exporter
+    metrics_path: /proxy
+    params:
+      module:
+        - mysql
     static_configs:
-      - targets: ['127.0.0.1:9256']
-        labels:
-          hostname: vps-01
+      - targets:
+          - 'vps-01:9999'
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        regex: '(.*):.*'
+        replacement: $1
+        target_label: hostname
+
+  - job_name: process_exporter
+    metrics_path: /proxy
+    params:
+      module:
+        - process
+    static_configs:
+      - targets:
+          - 'homelab-pi:9999'
+          - 'vps-01:9999'
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        regex: '(.*):.*'
+        replacement: $1
+        target_label: hostname
+
+  - job_name: node_exporter
+    metrics_path: /proxy
+    params:
+      module:
+        - node
+    static_configs:
+      - targets:
+          - 'homelab-pi:9999'
+          - 'vps-01:9999'
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        regex: '(.*):.*'
+        replacement: $1
+        target_label: hostname
+
+
+
+
+
+#  - job_name: vps-01_mysql-exporter
+#    static_configs:
+#      - targets: ['127.0.0.1:9104']
+#        labels:
+#          hostname: vps-01
+#    relabel_configs:
+#      - source_labels: [__address__]
+#        target_label: __param_target
+#      - source_labels: [__param_target]
+#        target_label: instance
+#      - target_label: __address__
+#        replacement: localhost:9104
+
+
+
 
   - job_name: 'smtp_status_tls'
     metrics_path: /probe
@@ -109,27 +146,3 @@ scrape_configs:
       # Actually talk to the blackbox exporter though
       - target_label: __address__
         replacement: 127.0.0.1:9116
-
-# homelab-pi
-
-  - job_name: homelab-pi_node_exporter
-    static_configs:
-      - targets: ['78.10.222.152:9100']
-        labels:
-          hostname: homelab-pi
-
-  - job_name: homelab-pi_process_exporter
-    static_configs:
-      - targets: ['78.10.222.152:9256']
-        labels:
-          hostname: homelab-pi
-
-  - job_name: homelab-pi_postgres_exporter
-    static_configs:
-      - targets: ['78.10.222.152:9187']
-        labels:
-          hostname: homelab-pi
-    metric_relabel_configs:
-    - source_labels: [datname]
-      regex: 'template[0-9]{1}'
-      action: drop
