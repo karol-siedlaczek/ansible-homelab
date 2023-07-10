@@ -6,6 +6,7 @@ wg:
   dns_host: "1.1.1.1"
   email_from_name: "Karol Siedlaczek (WG Admin)"
   interface_number: "0"
+  mtu: "1432"
 
 smtp:
   hostname: !vault |

@@ -16,6 +16,7 @@ Environment=WGUI_SERVER_POST_UP_SCRIPT="{{ wg.scripts_path }}/post-up.sh"
 Environment=WGUI_SERVER_POST_DOWN_SCRIPT="{{ wg.scripts_path }}/post-down.sh"
 Environment=WGUI_CONFIG_FILE_PATH="/etc/wireguard/wg{{ wg.interface_number }}.conf"
 Environment=WGUI_DNS="{{ wg.dns_host }}"
+Environment=WGUI_MTU="{{ wg.mtu }}"
 Environment=SMTP_PASSWORD="{{ smtp.password }}"
 ExecStart={{ wg.scripts_path }}/wireguard-ui -bind-address 0.0.0.0:5000 -smtp-hostname {{ smtp.hostname }} -smtp-port {{ smtp.port }} -smtp-username "{{ smtp.username }}" -smtp-auth-type {{ smtp.auth_type }} -smtp-encryption {{ smtp.encryption }} -email-from "{{ smtp.username }}" -email-from-name "{{ wg.email_from_name }}"
 ExecReload=/usr/bin/systemctl restart wg-quick@wg0.service

@@ -32,7 +32,7 @@ AcceptEnv LANG LC_*
 # Specifies wheter shhd chosuld print /etc/motd when user logs in interactively
 PrintMotd no
 
-# AllowUsers root storage keepass
+# AllowUsers root
 
 Match LocalPort 22
         AllowGroups ssh-int
@@ -40,11 +40,11 @@ Match LocalPort 22
 Match LocalPort 2222
         AllowGroups ssh-ext
 
-Match User storage
-        ForceCommand internal-sftp -u 0022
-        ChrootDirectory /var/storage/hdd
-        PermitTunnel no
-        X11Forwarding no
+#Match User storage
+#        ForceCommand internal-sftp -u 0022
+#        ChrootDirectory /var/storage/hdd
+#        PermitTunnel no
+#        X11Forwarding no
 
 Match Group ssh-ext
         ForceCommand internal-sftp -u 0022
@@ -56,8 +56,6 @@ Match Group ssh-ext
 Match Group sftp-users
         ChrootDirectory /var/storage/ssd/sftp/%u
 
-Match Group domain-users
-        ChrootDirectory /var/storage/ssd/domains/%u
 
 #ListenAddress 0.0.0.0
 #ListenAddress ::

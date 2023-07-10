@@ -69,8 +69,8 @@ define command {
 }
 
 define command {
-         command_name	check_ssl_cert
-         command_line	{{ nagios.scripts_path }}/checks/check_ssl_cert.sh -h $HOSTNAME$ -w $ARG1$ -c $ARG2$
+        command_name	check_ssl_cert
+        command_line	{{ nagios.scripts_path }}/checks/check_ssl_cert.sh -h $HOSTNAME$ -w $ARG1$ -c $ARG2$
 }
 
 define command {
@@ -96,6 +96,11 @@ define command {
 define command {
 	    command_name	check_domain_expiration
 	    command_line	{{ nagios.scripts_path }}/checks/check_domain_expiration.sh -d "$HOSTNAME$" -w $ARG1$ -c $ARG2$
+}
+
+define command {
+        command_name    check_backup_state
+        command_line    {{ nagios.scripts_path }}/checks/check_backup_state.sh $ARG1$ $ARG2$
 }
 
 ###############################################################################
@@ -125,14 +130,13 @@ define command {
 
 define command {
     command_name    notify-host-by-email
-    command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\nHost: $HOSTNAME$\nState: $HOSTSTATE$\nAddress: $HOSTADDRESS$\nInfo: $HOSTOUTPUT$\n\nDate/Time: $LONGDATETIME$\n" | /usr/bin/mail -s "** $NOTIFICATIONTYPE$ Host Alert: $HOSTNAME$ is $HOSTSTATE$ **" $CONTACTEMAIL$
+    command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\nHost: $HOSTNAME$\nState: $HOSTSTATE$\nAddress: $HOSTADDRESS$\nInfo: $HOSTOUTPUT$\n\nDate/Time: $LONGDATETIME$\n" | /usr/bin/sendemail -s $USER6$:587 -xu $USER4$ -xp $USER5$ -t $CONTACTEMAIL$ -f $USER4$ -l /var/log/sendemail.log -u "** $NOTIFICATIONTYPE$ Host Alert: $HOSTNAME$ is $HOSTSTATE$ **" -m "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\nHost: $HOSTNAME$\nState: $HOSTSTATE$\nAddress: $HOSTADDRESS$\nInfo: $HOSTOUTPUT$\n\nDate/Time: $LONGDATETIME$\n"
 }
-
 
 
 define command {
     command_name    notify-service-by-email
-    command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n" | /usr/bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+    command_line    /usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$" | /usr/bin/sendemail -s $USER6$:587 -xu $USER4$ -xp $USER5$ -t $CONTACTEMAIL$ -f $USER4$ -l /var/log/sendemail.log -u "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" -m "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$"
 }
 
 

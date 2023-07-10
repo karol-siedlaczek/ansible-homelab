@@ -3,6 +3,26 @@
 #  command: "git clone https://github.com/karol-siedlaczek/backup-tool.git > files/"
 #  delegate_to: localhost
 
+- name: Install packages
+  apt:
+    name:
+      - rsync
+      - build-essential
+      - ipcalc
+      - gzip
+      - htop
+      - hdparm
+      - iptables-persistent
+      - mdadm
+      - python3
+      - chromium
+      - chromium-browser
+      - certbot
+      - python3-certbot-apache
+
+- name: Install scripts from repo
+
+
 - name: Fetch backup-tool.py from repository
   git:
     repo: https://github.com/karol-siedlaczek/backup-tool.git
@@ -13,5 +33,24 @@
     repo: https://github.com/karol-siedlaczek/backup-tool.git
     dest: /usr/local/bin/tests
 
+- name: Set crontab
+  copy:
+    src: files/crontab
+    dest: /var/sppol/cron/crontabs/root
+    mode: 0600
+    force: true
 
-  #delegate_to: localhost
+- name: Copy secrets
+  file:
+    src: "files/secrets/{{ item.file }}"
+    dest: "{{ item.dest }}/{{ item.file }}"
+    owner: root
+    group: root
+    mode: 0600
+    force: true
+  with_items:
+    - { file: .pgpass, dest_path: /root }
+    - { file: .mysql.cnf, dest_path: /root }
+    - { file: .github-token, dest_path: /root }
+    - { file: rsyncd.secrets, dest_path: /etc }
+
